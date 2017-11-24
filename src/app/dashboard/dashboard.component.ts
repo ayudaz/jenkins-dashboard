@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Headers, Http} from '@angular/http';
 import {Dashboard, Job, Run, Stage, View} from './dashboard';
+import {Jenkins} from "./jenkins";
 
 @Component({
   selector: 'app-dashboard',
@@ -9,31 +10,40 @@ import {Dashboard, Job, Run, Stage, View} from './dashboard';
 })
 export class DashboardComponent implements OnInit {
 
-  private dashboardName = 'Mistral';
-  private user = 'thomaslelievre';
-  private token = '548b96c833aa3e1521cd29d9a8db644d';
+  private dashboardName = 'Jenkins Dashboard';
   private urlApiSuffixe = 'api/json';
   private urlApiPipelineSuffixe = '/wfapi';
-  private baseUrl = 'http://51.254.113.139:8080/';
   dashboard: Dashboard;
+  hide = true;
+  jenkins: Jenkins;
+  submit = false;
 
   constructor(private http: Http) {
     this.dashboard = new Dashboard();
     this.dashboard.name = this.dashboardName;
-    this.dashboard.jenkinsUrl = this.baseUrl;
     this.dashboard.views = Array<View>();
   }
 
-  ngOnInit(): void {
+  onSubmit(): void {
+    this.submit = true;
+    this.dashboard.jenkinsUrl = this.jenkins.baseUrl;
+    if (!this.dashboard.jenkinsUrl.endsWith('/')) {
+      this.dashboard.jenkinsUrl = this.dashboard.jenkinsUrl + '/';
+    }
+    this.dashboard.views = Array<View>();
     this.http.get(this.dashboard.jenkinsUrl + this.urlApiSuffixe, {headers: this.getHttpHeaders()}).subscribe(
       data => {
         this.setJenkinsData(data.json());
       });
   }
 
+  ngOnInit(): void {
+    this.jenkins = new Jenkins('', '', '');
+  }
+
   getHttpHeaders(): Headers {
     const aHeaders = new Headers();
-    aHeaders.set('Authorization', 'Basic ' + btoa(this.user + ':' + this.token));
+    aHeaders.set('Authorization', 'Basic ' + btoa(this.jenkins.user + ':' + this.jenkins.password));
     return aHeaders;
   }
 

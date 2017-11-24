@@ -1,21 +1,59 @@
 <mat-toolbar color="primary">
   <mat-toolbar-row>
-    <span>{{dashboard.name}}</span>
+
+    <button mat-icon-button (click)="param.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <h3>{{dashboard.name}}</h3>
   </mat-toolbar-row>
 </mat-toolbar>
-<mat-tab-group>
-  <mat-tab *ngFor="let view of dashboard.views" label="{{view.name}}">
-    <mat-card *ngFor="let job of view.jobs">
-      <mat-card-header>
-        <mat-card-title>{{job.name}}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content matLine>
-        <mat-toolbar *ngIf="job.runs.length > 0">
-          <mat-toolbar-row *ngFor="let stage of job.runs[0].stages">
-            <span>{{stage.name}}</span>-<span>{{stage.status}}</span>
-          </mat-toolbar-row>
-        </mat-toolbar>
-      </mat-card-content>
-    </mat-card>
-  </mat-tab>
-</mat-tab-group>
+<mat-sidenav-container>
+  <mat-sidenav mode="side" #param [opened]="!submit">
+    <div class="sidenav-content">
+      <form (ngSubmit)="onSubmit()" #jenkinsForm="ngForm" class="sidenav-form">
+        <mat-form-field class="input-full-width">
+          <input matInput placeholder="Jenkins Base Url" required type="text" [(ngModel)]="jenkins.baseUrl"
+                 name="baseUrl">
+        </mat-form-field>
+        <mat-form-field class="input-full-width">
+          <input matInput placeholder="Jenkins user" required type="text" [(ngModel)]="jenkins.user" name="user">
+        </mat-form-field>
+        <mat-form-field class="input-full-width">
+          <input matInput placeholder="Jenkins password" required [type]="hide ? 'password' : 'text'"
+                 [(ngModel)]="jenkins.password" name="password">
+          <mat-icon matSuffix (click)="hide = !hide">{{hide ? 'visibility' : 'visibility_off'}}</mat-icon>
+        </mat-form-field>
+        <button type="submit" mat-raised-button color="primary">Valider</button>
+      </form>
+    </div>
+  </mat-sidenav>
+  <mat-card *ngIf="submit && dashboard.views.length == 0">
+    Aucune vue sur ce Jenkins !
+  </mat-card>
+  <mat-tab-group *ngIf="dashboard.views.length > 0">
+    <mat-tab *ngFor="let view of dashboard.views">
+      <ng-template mat-tab-label>{{view.name}}</ng-template>
+      <mat-card *ngFor="let job of view.jobs">
+        <mat-card-header>
+          <mat-card-title>
+            <h2>{{job.name}}</h2>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content *ngIf="job.runs.length > 0">
+          <mat-grid-list [cols]="job.runs[0].stages.length" rowHeight="4:1" gutterSize="50px">
+            <span *ngFor="let stage of job.runs[0].stages">
+            <mat-grid-tile [ngClass]="{
+                success: stage.status == 'SUCCESS',
+                notExecuted: stage.status == 'NOT_EXECUTED',
+                unstable: stage.status == 'UNSTABLE',
+                failed: stage.status == 'FAILED'
+                }">
+              <h1>{{stage.name}}</h1>
+            </mat-grid-tile>
+            </span>
+          </mat-grid-list>
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+  </mat-tab-group>
+</mat-sidenav-container>

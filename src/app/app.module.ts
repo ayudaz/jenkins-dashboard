@@ -7,14 +7,20 @@ import {HttpModule} from '@angular/http';
 import {HttpClientModule} from '@angular/common/http';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
+  MatButtonModule,
   MatCardModule,
   MatChipsModule,
   MatGridListModule,
+  MatIconModule,
+  MatInputModule,
   MatListModule,
+  MatMenuModule,
+  MatSidenavModule,
   MatStepperModule,
   MatTabsModule,
   MatToolbarModule
 } from '@angular/material';
+import {FormsModule} from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -32,7 +38,13 @@ import {
     MatListModule,
     MatCardModule,
     MatChipsModule,
-    MatStepperModule
+    MatStepperModule,
+    MatSidenavModule,
+    MatMenuModule,
+    MatIconModule,
+    MatButtonModule,
+    MatInputModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
