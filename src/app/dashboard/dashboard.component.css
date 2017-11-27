@@ -41,3 +41,19 @@ mat-sidenav-container, .my-content {
   height: 100%;
   min-height: 250px;
 }
+
+.green {
+  color: lightgreen;
+}
+
+.red {
+  color: #ff6d5c;
+}
+
+.grey {
+  color: lightgrey;
+}
+
+mat-grid-tile {
+  max-height: 100px;
+}
