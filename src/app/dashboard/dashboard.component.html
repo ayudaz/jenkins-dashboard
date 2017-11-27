@@ -36,10 +36,14 @@
       <mat-card *ngFor="let job of view.jobs">
         <mat-card-header>
           <mat-card-title>
-            <h2>{{job.name}}</h2>
+            <h2 [ngClass]="{
+              green: job.runs.length > 0 && job.runs[0].status == 'SUCCESS',
+              red: job.runs.length > 0 && (job.runs[0].status == 'FAILURE' || job.runs[0].status == 'FAILED') ,
+              grey: job.runs.length == 0
+            }">{{job.name}}</h2>
           </mat-card-title>
         </mat-card-header>
-        <mat-card-content *ngIf="job.runs.length > 0">
+        <mat-card-content *ngIf="job.runs.length > 0 && job.runs[0].stages.length > 0">
           <mat-grid-list [cols]="job.runs[0].stages.length" rowHeight="4:1" gutterSize="50px">
             <span *ngFor="let stage of job.runs[0].stages">
             <mat-grid-tile [ngClass]="{

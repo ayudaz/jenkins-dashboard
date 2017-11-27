@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Headers, Http} from '@angular/http';
 import {Dashboard, Job, Run, Stage, View} from './dashboard';
-import {Jenkins} from "./jenkins";
+import {Jenkins} from './jenkins';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,6 +39,18 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.jenkins = new Jenkins('', '', '');
+    this.http.get('./assets/jenkins.json').subscribe(
+      data => {
+        this.getJenkinsInfos(data.json());
+      });
+  }
+
+  public getJenkinsInfos(jenkinsData) {
+    console.log(jenkinsData);
+    this.jenkins.baseUrl = jenkinsData.baseUrl;
+    this.jenkins.user = jenkinsData.user;
+    this.jenkins.password = jenkinsData.password;
+    this.onSubmit();
   }
 
   getHttpHeaders(): Headers {
@@ -73,12 +85,43 @@ export class DashboardComponent implements OnInit {
       job.name = jobJson.name;
       job.jenkinsUrl = jobJson.url;
       job.runs = Array<Run>();
-      this.http.get(job.jenkinsUrl + this.urlApiPipelineSuffixe + '/runs', {headers: this.getHttpHeaders()}).subscribe(
+      if (jobJson._class === 'org.jenkinsci.plugins.workflow.job.WorkflowJob') {
+        this.http.get(job.jenkinsUrl + this.urlApiPipelineSuffixe + '/runs', {headers: this.getHttpHeaders()}).subscribe(
+          data => {
+            this.setRunsData(job, data.json());
+          }
+        );
+      } else {
+        this.http.get(job.jenkinsUrl + this.urlApiSuffixe, {headers: this.getHttpHeaders()}).subscribe(
+          data => {
+            this.setJobData(job, data.json());
+          }
+        );
+      }
+    }
+  }
+
+  setJobData(job: Job, jobData) {
+    console.log(jobData);
+    if (jobData.lastBuild != null) {
+      this.http.get(jobData.lastBuild.url + this.urlApiSuffixe, {headers: this.getHttpHeaders()}).subscribe(
         data => {
-          this.setRunsData(job, data.json());
+          this.setSingleRunData(job, data.json());
         }
       );
     }
+  }
+
+  setSingleRunData(job: Job, runData) {
+    console.log(runData);
+    const run: Run = new Run();
+    run.id = runData.id;
+    run.name = runData.displayName;
+    run.status = runData.result;
+    run.startTimeMillis = runData.timestamp;
+    run.durationMillis = runData.duration;
+    run.stages = Array<Stage>();
+    job.runs.push(run);
   }
 
   setRunsData(job: Job, runsData) {
